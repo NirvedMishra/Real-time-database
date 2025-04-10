@@ -6,9 +6,11 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import {Navigate, useNavigate} from 'react-router-dom';
 import { useState } from 'react';
 import Form from 'react-bootstrap/Form';
+import { useAuth } from './Auth/AuthProvider';
 
 function RegisterCard() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const Auth = useAuth();
   const [emailId,setEmailId] = useState("");
   const handleChange = (evt)=>{
      setEmailId(()=> evt.target.value)
@@ -23,15 +25,26 @@ function RegisterCard() {
   const handleOtpChange = (evt) => {
     setOtp(evt.target.value);
   };
-  const handleSubmitOne = (e) => {
+  const handleSubmitOne = async(e) => {
      e.preventDefault();
-    setShowOtp(true);
-    setShowOtpbutton(false);
-    //navigate(`/dashboard`);
+    const data = {
+      email:emailId,
+      password:password
+    }
+      const response = await Auth.Register(data);
+      if(response){
+      setShowOtp(true);
+      setShowOtpbutton(false);}
+ 
+  
   }
-  const handleSubmitTwo = (e) => {
+  const handleSubmitTwo = async(e) => {
     e.preventDefault();
-   navigate(`/dashboard`);
+    const data = {
+      email:emailId,
+      otp:otp
+    }
+    await Auth.verify(data);
  }
   return (
     <Container style={{display:'flex',justifyContent:'center',alignItems:'center',height:'80vh'}}>
@@ -46,7 +59,7 @@ function RegisterCard() {
             </Card.Text>
             <Container style={{display:'flex',justifyContent:'left'}}>
             <Form>
-              <Form.Control type='text' name='email' placeholder='Email ID' onChange={handleChangePass} value={password}></Form.Control>
+              <Form.Control type='text' name='email' placeholder='Email ID' onChange={handleChange} value={emailId}></Form.Control>
             </Form>
             </Container>
             <br />
@@ -55,7 +68,7 @@ function RegisterCard() {
             </Card.Text>
             <Container style={{display:'flex',justifyContent:'left'}}>
             <Form>
-              <Form.Control type='password' name='password' placeholder='Password' onChange={handleChange} value={emailId}></Form.Control>
+              <Form.Control type='password' name='password' placeholder='Password' onChange={handleChangePass} value={password}></Form.Control>
               {showOtpbutton && (
               <>
               <Button style={{marginTop:10}} variant='primary'type='submit' onClick={handleSubmitOne}>Get OTP</Button>

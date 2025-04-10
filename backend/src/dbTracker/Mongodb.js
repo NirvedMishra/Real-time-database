@@ -11,7 +11,7 @@ function parseChange(change) {
     collectionName: change.ns.coll,
     documentId: change.documentKey._id.toString(),
     operationType: change.operationType,
-    time: timestamp
+    time: timestamp.toISOString()
   };
 }
 
@@ -31,6 +31,7 @@ async function startTracking(userId, connectionString, database) {
   
 
     const updateData = parseChange(change);
+    console.log(updateData);
     await User.findByIdAndUpdate(
       userId,
       { $push: { dbUpdates: updateData } },

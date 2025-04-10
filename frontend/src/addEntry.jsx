@@ -1,11 +1,10 @@
 import NavbarDashboard from "./navbarDashboard";
 import EnterData from "./dataEntryForm";
 
-function EntryPage(){
+function EntryPage({isTracking}){
     return(
         <div>
-            <NavbarDashboard></NavbarDashboard>
-            <EnterData></EnterData>
+            <EnterData isTracking={isTracking}></EnterData>
         </div>
     );
 }

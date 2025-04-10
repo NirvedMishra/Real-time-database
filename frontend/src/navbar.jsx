@@ -5,7 +5,7 @@ function NavbarHome() {
   return (
     <Navbar className="bg-body-tertiary" bg="dark" data-bs-theme="dark">
       <Container>
-        <Navbar.Brand href="#home">RealTime DataWatch</Navbar.Brand>
+        <Navbar.Brand href="#home">DeltaWatch</Navbar.Brand>
         <Navbar.Toggle />
         <Navbar.Collapse className="justify-content-end">
         <Navbar.Text>

@@ -3,59 +3,104 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import Button from 'react-bootstrap/esm/Button';
 import { Navigate,useNavigate } from 'react-router-dom';
+import { io } from 'socket.io-client';
+import { useAuth } from './Auth/AuthProvider';
 
 function DataTable() {
   //const navigate= useNavigate();
-  const [data, setData] = useState([]);
-  useEffect(() => {
-    const names = ["Shrey Jaiswal", "Aryan Poonia", "Nirved Mishra"];
-    const operations = ["Added", "Edited", "Edited"];
-    const time= ["23:40:00","14:25:56","15:58:23"];
-  
-    const testData = [...Array(3)].map((_, i) => ({
-      id: i + 1,
-      name: `${names[i]}`,
-      operation: `${operations[i]}`,
-      time: `${time[i]}`
-    }));
-  
-    setData(testData);
-  }, []);
-  // const handleSubmit = (e) => {
-  //   e.preventDefault();
-  //  navigate(`/addentry`);
-  // }
-  
-//   useEffect(() => {
-//     // Replace this URL with your backend API endpoint
-//     fetch('https://example.com/api/data')
-//       .then((response) => response.json())
-//       .then((fetchedData) => {
-//         setData(fetchedData);
-//       })
-//       .catch((error) => console.error('Error fetching data:', error));
-//   }, []);
+  const backend_Url = import.meta.env.VITE_BACKEND_URL;
+  const Auth = useAuth();
+  const userId = JSON.parse(Auth.info)._id;
+  const dbName = JSON.parse(Auth.info).dbName;
 
+  const [data, setData] = useState([]);
+  
+  useEffect(() => {
+     const getData = async()=>{
+      try {
+        const response = await fetch(`${backend_Url}/api/v1/db/giveDB`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include"
+        });
+        if (!response.ok) {
+          const contentType = response.headers.get('content-type');
+          if (contentType && contentType.includes('application/json')) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Something went wrong');
+          } else {
+            throw new Error('Unexpected response format');
+          }
+        }
+        const res = await response.json();
+        if (res.statusCode == 200) {
+          setData(res.data);
+        }   
+  } catch (error) {
+    console.error(error);
+  }
+     }
+     getData();
+    const socket = io(backend_Url, {
+      query: { userId },
+      transports: ['websocket'], // optional: skip polling
+    });
+
+    // 2) Subscribe to the user‑specific event
+    const eventName = `realtime-update-${userId}`;
+    socket.on(eventName, (data) => {
+      setData((prevData) => {
+        const newData = [...prevData,data];
+        return newData;
+      })
+    });
+
+    // 3) Cleanup on unmount: disconnect socket and remove listeners
+    return () => {
+      socket.off(eventName);
+      socket.disconnect();
+    };
+  }, []);
+ 
+  function formatIso(isoString) {
+    const dt = new Date(isoString);
+  
+    // DD/MM/YYYY
+    const date = dt.toLocaleDateString('en-GB'); 
+    // e.g. "10/04/2025"
+  
+    // HH:MM:SS (24‑hour clock)
+    const time = dt.toLocaleTimeString('en-GB', {
+      hour:   '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+    // e.g. "20:08:26"
+  
+    return { date, time };
+  }
   return (
     <Container>
-      <h2 className="mt-4">Details</h2>
+      <h2 className="mt-4">Database: {dbName}</h2>
       <Table striped bordered hover className="mt-3">
         <thead>
           <tr>
             <th>Time</th>
-            <th>Name</th>
+            <th>Collection Name</th>
             <th>Operation Type</th>
             <th>ID</th>
           </tr>
         </thead>
         <tbody>
           {data.length > 0 ? (
-            data.map((item) => (
-              <tr key={item.id}>
-                <td>{item.time}</td>
-                <td>{item.name}</td>
-                <td>{item.operation}</td>
-                <td>{item.id}</td>
+            data.slice().reverse().map((item,i) => (
+              <tr key={i}>
+                <td>{`${formatIso(item.time).time}, ${formatIso(item.time).date}`}</td>
+                <td>{item.collectionName}</td>
+                <td>{item.operationType}</td>
+                <td>{item.documentId}</td>
               </tr>
             ))
           ) : (

@@ -41,7 +41,7 @@ const verifyUser = asynchandler(async (req, res) => {
         throw new ApiError(400, "Invalid otp")
     }
     user.isVerified = true;
-    user.otp = "";
+    user.otp = '';
     const accessToken = await user.generateAccessToken();
     const refreshToken = await user.generateRefreshToken();
     user.refreshToken = refreshToken;

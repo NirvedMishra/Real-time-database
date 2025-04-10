@@ -4,11 +4,10 @@ import dotenv from 'dotenv'
 import cookieParser from 'cookie-parser'
 dotenv.config()
 const app = express();
-app.use(express.json());
-const allowedOrigins = ['http://localhost:5500', 'http://127.0.0.1:5500'];
+app.use(express.json());;
 const corsOptions = {
     credentials: true,
-    origin: allowedOrigins, // Replace with your client app's URL
+    origin: process.env.CORS_ORIGIN, // Replace with your client app's URL
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization']
   };
