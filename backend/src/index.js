@@ -2,7 +2,9 @@ import dotenv from "dotenv";
 import { app } from "./app.js";
 import mongoose from "mongoose";
 import { DB_NAME } from "./constants.js";
-
+import { setupSocket } from "./socket.js";
+import http from "http";
+import { resumeTrackingForActiveUsers } from "./dbTracker/Mongodb.js";
 
 const connectDB = async () => {
     try {
@@ -19,9 +21,13 @@ const connectDB = async () => {
 dotenv.config({
     path:"../.env"
 });
+
+const server = http.createServer(app);
 console.log(process.env.USER_DB_URI)
-connectDB().then(() => {
-    app.listen(process.env.PORT || 3000, () => {
+connectDB().then(async () => {
+    await resumeTrackingForActiveUsers();
+    setupSocket(server);
+    server.listen(process.env.PORT || 3000, () => {
         console.log(`Server is running on port ${process.env.PORT || 3000}`);
     });
 })

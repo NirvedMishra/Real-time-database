@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Realtime DB Updates</title>
+</head>
+<body>
+  <h1>📡 Real-time Updates</h1>
+  <div id="updates"></div>
+
+  <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+  <script>
+    // Replace with an actual user ID from your database
+    const userId = '67f7a9b3de9951a5c6e64d95'; 
+
+    const socket = io('http://localhost:3000', {
+      query: { userId },
+    });
+
+    socket.on(`realtime-update-${userId}`, (data) => {
+      console.log('📥 Update received:', data);
+
+      const updatesDiv = document.getElementById('updates');
+      const div = document.createElement('div');
+      div.textContent = JSON.stringify(data);
+      updatesDiv.prepend(div);
+    });
+
+    socket.on('connect', () => {
+      console.log('✅ Connected to server');
+    });
+
+    socket.on('disconnect', () => {
+      console.log('❌ Disconnected from server');
+    });
+  </script>
+</body>
+</html>

@@ -14,10 +14,34 @@ const userSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    dbList:{
-        type:Array,
-        default:[]
+    isTracking:{
+        type:Boolean,
+        default:false
     },
+    dbName:{
+        type:String,
+    },
+    dbString:{
+        type:String
+    },
+    dbUpdates: [
+        {
+            operationType: {
+                type: String,
+                required: true,
+            },
+            collectionName: {
+                type: String,
+            },
+            documentId: {
+                type: String,
+                required: true,
+            },
+            time: {
+                type: String,
+            },
+        },
+    ],
     otp:{
         type:String,
         default:""
@@ -50,8 +74,7 @@ userSchema.methods.generateAccessToken = function(){
     return jwt.sign(
         {
             _id: this._id,
-            email: this.email,
-            dbList: this.dbList
+            email: this.email
         },
         process.env.ACCESS_TOKEN_SECRET,
         {
