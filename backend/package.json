@@ -25,6 +25,7 @@
     "googleapis": "^148.0.0",
     "jsonwebtoken": "^9.0.2",
     "jwt-decode": "^4.0.0",
+    "kafkajs": "^2.2.4",
     "mongodb": "^6.15.0",
     "mongoose": "^8.13.2",
     "nodemailer": "^6.10.0",

@@ -1,6 +1,8 @@
 import { MongoClient } from 'mongodb';
-import { changeEventEmitter } from '../event.js';
 import { User } from '../models/user.model.js';
+import { producer } from '../utils/kafka.js';
+
+
 
 function parseChange(change) {
   const timestamp = new Date(change.clusterTime.getHighBits() * 1000); // Convert BSON timestamp to JS Date
@@ -35,7 +37,15 @@ async function startTracking(userId, connectionString, database) {
       { new: true }
     )
 
-    changeEventEmitter.emit(`update:${userId}`, updateData);
+    await producer.send({
+      topic: 'db-change',
+      messages: [{
+        // include userId so the consumer can route
+        value: JSON.stringify({ userId, 
+          collectionName:updateData.collectionName, documentId:updateData.documentId, operationType:updateData.operationType, time:updateData.time 
+        })
+      }]
+    });
   });
 
   activeStreams.set(userId, { client, changeStream });
