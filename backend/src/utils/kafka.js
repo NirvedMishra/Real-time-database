@@ -1,7 +1,7 @@
 // src/utils/kafka.js
 import { Kafka } from 'kafkajs';
 
-const kafka = new Kafka({ clientId:'realtime-db', brokers:['localhost:9092'] });
+const kafka = new Kafka({ clientId:'realtime-db', brokers:[process.env.KAFKA_BROKER] });
 export const producer = kafka.producer();
 export const consumer = kafka.consumer({ groupId:'ws-router' });
 
